@@ -1,6 +1,6 @@
 #!/bin/bash
 
-containers=$(sudo docker ps -q)  # Correct command substitutions
+containers=$(sudo docker ps -q)  # Correct command substitution
 
 echo "$containers"               # Print container IDs
 
