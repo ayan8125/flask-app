@@ -1,0 +1,33 @@
+version: 0.2
+
+env:
+  parameter-store:
+    DOCKER_REGISTRY_USERNAME: /myapp/docker-credentials/username
+    DOCKER_REGISTRY_PASSWORD: /myapp/docker-credentials/passwod
+    REPO_NAME: /myapp/docker-credentials/repo_name
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+  pre_build:
+    commands:
+      - echo "Logging into Docker Hub..."
+      - echo $DOCKER_REGISTRY_PASSWORD | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin
+      - echo "install dependecies"
+      - pip install -r requirements.txt
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - docker build -t $DOCKER_REGISTRY_USERNAME/$REPO_NAME:version1 .
+  post_build:
+    commands:
+      - echo "Pushing image to Docker Hub..."
+      - docker push $DOCKER_REGISTRY_USERNAME/$REPO_NAME:version1
+      - printf '{"ImageURI":"%s"}' "$DOCKER_REGISTRY_USERNAME/$REPO_NAME:version1" > imageDetail.json
+
+artifacts:
+  files:
+    - appspec.yml
+    - scripts/*
+    - imageDetail.json
